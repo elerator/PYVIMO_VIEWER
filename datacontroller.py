@@ -25,7 +25,9 @@ class DataController:
             self.add_data_display(model)
 
     def set_start_pos_adapter(self, msg, model):
-        """ Converts the string entered in a lineEdit to an int if possible and sets the start position of the video relative to the EEG accordingly"""
+        """ Converts the string entered in a lineEdit to an int if possible and sets the start position of the video relative to the EEG accordingly.
+            Used in add_data_display(...) below.
+        """
         try:
             pos = int(msg)
             model.set_start_pos(pos)
