@@ -1,5 +1,5 @@
 import numpy as np
-from model import DataModel
+from datamodel import DataModel
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import *

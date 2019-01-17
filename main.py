@@ -1,6 +1,7 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from view import*
-from model import*
+from datamodel import DataModel
+from videomodel import VideoModel
 from datacontroller import DataController
 from filedialog import FileDialog
 
@@ -27,7 +28,7 @@ if __name__ == "__main__":
 
     model = DataModel()
     video = VideoModel()
-    c = DataController(ui.add_datadisplay, ui.verticalLayout_4, videomodel = video)#Add controller such that DataViews may be added to ScrollArea
+    c = DataController(ui.add_datadisplay, ui.verticalLayout_4, videomodel = video)#Add controller such that DataViews may be added to Layout (ScrollArea)
     connect(ui, video, model)
 
     PYVIMO.show()

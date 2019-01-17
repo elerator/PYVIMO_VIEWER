@@ -2,8 +2,8 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
-from model import DataModel
-from model import VideoModel
+from datamodel import DataModel
+from videomodel import VideoModel
 
 class FileDialog():
     @staticmethod
