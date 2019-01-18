@@ -5,12 +5,25 @@ from PyQt5.QtWidgets import *
 
 import numpy as np
 
+
+class StaticDisplayOverlay(QWidget):
+    def __init__(self, parent = None):
+        QWidget.__init__(self, parent)
+
+    def paintEvent(self, event):
+        qp = QPainter(self)
+        br = QBrush(QColor(100, 100, 100, 100))
+        qp.setBrush(br)
+        qp.drawRect(QRect(QPoint(100,100),QPoint(np.random.randint(100,200),np.random.randint(100,200))))
+
 class SelectBoxOverlay(QObject):
     coordinates = pyqtSignal(QRect)
 
     def __init__(self, w, parent = None):
         QObject.__init__(self, parent)
         self.overlay = SelectBoxOverlay.Overlay(self, w)
+
+        self.other_overlay = None
 
     def eventFilter(self, w, event):
         if event.type() == QEvent.Resize:
@@ -24,6 +37,15 @@ class SelectBoxOverlay(QObject):
 
         if event.type() == QEvent.MouseButtonRelease:
             self.overlay.mouseReleaseEvent(event)
+
+        if event.type() == QEvent.Paint:
+            if self.overlay.has_changed:
+                self.overlay.has_changed = False
+                self.other_overlay = StaticDisplayOverlay(w);
+                self.other_overlay.setGeometry(w.geometry());
+                self.other_overlay.show();
+            pass
+
         return False
 
     class Overlay(QWidget):
@@ -36,6 +58,8 @@ class SelectBoxOverlay(QObject):
             self.box_end = QtCore.QPoint(0,0)
             self.parent = parent
             self.outer_instance = outer_instance
+
+            self.has_changed= False
 
         def get_box_coordinates(self):
             """ returns the coordinates of the current selection"""
@@ -75,4 +99,5 @@ class SelectBoxOverlay(QObject):
             self.begin = event.pos()
             self.end = event.pos()
 
+            self.has_changed = True
             self.outer_instance.coordinates.emit(self.get_box_coordinates())
