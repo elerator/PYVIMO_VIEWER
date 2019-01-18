@@ -213,6 +213,8 @@ class DataModel(QObject):
             self.video_start_in_eeg. If no vmrk_path was set start_pos is set to 0. If start_pos_in_datapoints is provided
             self.video_start_in_eeg is set to 0"""
 
+        print("set start_pos in datatpoints to " + str(start_pos_in_datapoints))
+
         if(not type(start_pos_in_datapoints)==type(None)):
             self.video_start_in_eeg = start_pos_in_datapoints
             #self.set_pos_in_video(self.get_framenumber()) # Communicate changes via emit in set_pos_in_video
@@ -222,7 +224,7 @@ class DataModel(QObject):
                 return
             data = self.parse_vmrk(self.vmrk_path)
             #assuming earliest meaningful event is start of video
-            pos = 10000000000000000000000000000000000000000000000
+            pos = 10000000000000000
             try:
                 for key, value in pair[str(dyad)]['eeg']['metainfo']['description'].items():#Search for R128
                     if(value == 'R128'):
@@ -234,6 +236,7 @@ class DataModel(QObject):
 
             if(pos == 10000000000000000):
                 pos = 0
+
             self.video_start_in_eeg = int(pos)
 
 

@@ -49,4 +49,4 @@ class VideoPlot(QLabel):
         scaledPix = self.pixmap.scaled(size, Qt.KeepAspectRatio, transformMode = Qt.FastTransformation)
         self.setPixmap(scaledPix)
 
-        QCoreApplication.processEvents()
+        #QCoreApplication.processEvents()
