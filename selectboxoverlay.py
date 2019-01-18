@@ -4,17 +4,8 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
 import numpy as np
+import sip
 
-
-class StaticDisplayOverlay(QWidget):
-    def __init__(self, parent = None):
-        QWidget.__init__(self, parent)
-
-    def paintEvent(self, event):
-        qp = QPainter(self)
-        br = QBrush(QColor(100, 100, 100, 100))
-        qp.setBrush(br)
-        qp.drawRect(QRect(QPoint(100,100),QPoint(np.random.randint(100,200),np.random.randint(100,200))))
 
 class SelectBoxOverlay(QObject):
     coordinates = pyqtSignal(QRect)
@@ -39,14 +30,28 @@ class SelectBoxOverlay(QObject):
             self.overlay.mouseReleaseEvent(event)
 
         if event.type() == QEvent.Paint:
-            if self.overlay.has_changed:
-                self.overlay.has_changed = False
-                self.other_overlay = StaticDisplayOverlay(w);
-                self.other_overlay.setGeometry(w.geometry());
-                self.other_overlay.show();
-            pass
-
+            #if paintEvent is due to overlay having updated recently: update static display as well (the other one disappears)
+            if self.overlay.data_has_changed:
+                self.overlay.data_has_changed = False
+                if self.other_overlay:
+                    sip.delete(self.other_overlay)
+                self.other_overlay = SelectBoxOverlay.StaticDisplayOverlay(self.overlay.begin,self.overlay.end,w)
+                self.other_overlay.setGeometry(w.geometry())
+                self.other_overlay.show()
         return False
+
+    class StaticDisplayOverlay(QWidget):
+        def __init__(self, begin, end,parent = None):
+            QWidget.__init__(self, parent)
+            self.begin = begin
+            self.end = end
+
+        def paintEvent(self, event):
+            qp = QPainter(self)
+            br = QBrush(QColor(100, 100, 100, 100))
+            qp.setBrush(br)
+            qp.drawRect(QRect(  QtCore.QPoint(self.begin.x()-10,self.begin.y()-10),
+                                QtCore.QPoint(self.end.x()-10,self.end.y()-10)))
 
     class Overlay(QWidget):
         def __init__(self, outer_instance,parent = None):
@@ -59,7 +64,8 @@ class SelectBoxOverlay(QObject):
             self.parent = parent
             self.outer_instance = outer_instance
 
-            self.has_changed= False
+            self.data_has_changed = True
+            self.update()
 
         def get_box_coordinates(self):
             """ returns the coordinates of the current selection"""
@@ -69,15 +75,16 @@ class SelectBoxOverlay(QObject):
             qp = QPainter(self)
             br = QBrush(QColor(100, 100, 100, 100))
             qp.setBrush(br)
-            qp.drawRect(QRect(self.begin,self.end))
+            qp.drawRect(QRect(  QtCore.QPoint(self.begin.x()-10,self.begin.y()-10),
+                                QtCore.QPoint(self.end.x()-10,self.end.y()-10)))
 
         def mousePressEvent(self, event):
             """ Resets coordinates of the select box. Sets beginning point to mouse pos.
                 Args:
                     event: GUI event
             """
-            self.begin = event.pos()
-            self.end = event.pos()
+            self.begin =  event.pos()
+            self.end =  event.pos()
             self.update()
 
         def mouseMoveEvent(self, event):
@@ -96,8 +103,9 @@ class SelectBoxOverlay(QObject):
             """
             self.box_begin = self.begin
             self.box_end = event.pos()
-            self.begin = event.pos()
+            self.begin = self.begin
             self.end = event.pos()
 
-            self.has_changed = True
+            self.data_has_changed = True
             self.outer_instance.coordinates.emit(self.get_box_coordinates())
+            self.update()
