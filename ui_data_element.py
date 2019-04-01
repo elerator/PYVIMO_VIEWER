@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'dataview_element.ui'
+# Form implementation generated from reading ui file 'ui_data_element.ui'
 #
 # Created by: PyQt5 UI code generator 5.6
 #

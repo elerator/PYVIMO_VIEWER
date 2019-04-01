@@ -44,6 +44,8 @@ class VideoModel(QObject):
         self.video_loader_thread = VideoModel.ImageIOReaderThread(self)
         self.playback_thread = VideoModel.PlaybackThread(self)
 
+        self.ignore_sliders_message = False
+
     def init_video(self):
         """ Initializes the video. Sets total_framenumber, creates video_reader etc.. """
         self.cap = cv2.VideoCapture(self.filepath)
@@ -142,21 +144,17 @@ class VideoModel(QObject):
                 self.frame.emit(frame)
         return frame
 
-    def frame_forward(self):
-        n = self.get_framenumber()+1
-        if(n < self.get_amount_of_frames()):
-            self.set_framenumber(n)
-        else:
-            print("reached end of video")
-
     def set_framenumber(self, x, inform_slider = True):
         if(self.accept_external_control):
+            #print(str(x) + " at set_framenumber")
             self._set_framenumber(x, inform_slider)
 
     def _set_framenumber(self, x, inform_slider = True):
         if(x > self.total_frames):
             self.current_frame = self.total_frames-1
             warnings.warn("x > self.total_frames")
+        elif(x<0):
+            warnings.warn("x < 0")
         else:
             self.current_frame = x
 
@@ -173,14 +171,30 @@ class VideoModel(QObject):
             print(e)
         #self.frame.emit(self.video_reader.get_data(self.current_frame))
 
+    def set_framenumber_via_slider(self,n):
+        if not self.ignore_sliders_message:#If framenumber was set manually before dont update otherwise do.
+            self.set_framenumber(n, False)
+        self.ignore_sliders_message = False
+
     def get_framenumber(self):
         return self.current_frame
 
+    def frame_forward(self):
+        self.ignore_sliders_message = True #slider will inform about new pos but inaccurately
+        self.set_framenumber(self.get_framenumber()+1)
 
     def frame_back(self):
-        n = self.get_framenumber()-1
-        if(n >= 0):
-            self.set_framenumber(n)
+        self.ignore_sliders_message = True #slider will inform about new pos but inaccurately
+        self.set_framenumber(self.get_framenumber()-1)
+
+    def frames_back(self, n, inform_slider = True):
+        self.ignore_sliders_message = True #slider will inform about new pos but inaccurately
+        self.set_framenumber(self.get_framenumber()-n)
+
+    def frames_forward(self, n, inform_slider = True):
+        self.ignore_sliders_message = True #slider will inform about new pos but inaccurately
+        curr = self.get_framenumber()
+        self.set_framenumber(curr+n)
 
     def get_amount_of_frames(self):
         return self.total_frames

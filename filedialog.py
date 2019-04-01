@@ -18,7 +18,7 @@ class FileDialog():
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
         fileName, _ = QFileDialog.getOpenFileName(None,"QFileDialog.getOpenFileName()", "",
-                                                  "Mp4 Video (*.mp4);; AVI Video (*.avi);; MOV Video files (*.mov);; MPEG Video files (*.mpeg);;",
+                                                  "Wmv Video (*.wmv);;Mp4 Video (*.mp4);; AVI Video (*.avi);; MOV Video files (*.mov);; MPEG Video files (*.mpeg);;",
                                                   options=options)
         if fileName:
             video.load(fileName)
@@ -31,4 +31,7 @@ class FileDialog():
                                                   "EEG files (*.eeg);;Motion files(*.mot);;Motion files(*.hdf5);;",
                                                   options=options)
         if fileName:
-            model.load(fileName)
+            try:
+                model.load(fileName)
+            except:
+                pass#invalid file selected don't do anything

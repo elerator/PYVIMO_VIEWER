@@ -63,17 +63,23 @@ class InteractiveDataplot2d(ImageView):
         if self.video_model != None:
             pos = int(self.video_model.get_pos(datatype = "motion"))
             self.indicator = self.view.plot([pos,pos],[self.indicator_min,self.indicator_max],pen=pyqtgraph.mkPen(color=pyqtgraph.hsvColor(2),width=1))
+        else:
+            pos = 0
+            self.indicator = self.view.plot([pos,pos],[self.indicator_min,self.indicator_max],pen=pyqtgraph.mkPen(color=pyqtgraph.hsvColor(2),width=1))
 
-    def update(self, pos):
+
+    def update_indicator(self, pos):
         """ Updates indicator position
             Args:
                 pos: Int describing the current position of the indicator
         """
-        if self.print_indicator and self.indicator and self.video_model:
+        if self.print_indicator and self.indicator:
             C=pyqtgraph.hsvColor(1)
             pen=pyqtgraph.mkPen(color=C,width=1)
-            pos = int(self.video_model.get_pos(datatype = self.model.get_datatype()))
+            #pos = int(self.video_model.get_pos(datatype = self.model.get_datatype()))
             self.indicator.setData([pos,pos],[self.indicator_min,self.indicator_max])
+
+
 
     def updateImage(self, autoHistogramRange=True):
         """ Updates the image, setting the colormap"""

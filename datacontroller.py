@@ -1,5 +1,5 @@
 from datamodel import DataModel
-from dataview import DataView
+from ui_dataelement_adapter import Ui_DataElementAdapter
 
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
@@ -48,7 +48,8 @@ class DataController:
         self.datamodels.append(model)
 
         #Create VIEW and add it (widget) to layout
-        optiondisplay = DataView()
+        optiondisplay = Ui_DataElementAdapter()
+        self.optiondisplay = optiondisplay
         self.dataviews.append(optiondisplay)
         self.layout.addWidget(optiondisplay)
 
@@ -57,12 +58,26 @@ class DataController:
         optiondisplay.close_1.clicked.connect(lambda msg: self.delete(optiondisplay, self.layout) )
         optiondisplay.load_1.clicked.connect(lambda msg: FileDialog.load(model))
         optiondisplay.lineEdit.textChanged.connect(lambda msg: self.set_start_pos_adapter(msg, model))
+        optiondisplay.spinBox.valueChanged.connect(model.set_channel)
         model.channeldata.connect(optiondisplay.graphicsView.print_data)#TODO rename to dataplot and also in designer
+        self.videomodel.framenumber.connect(optiondisplay.graphicsView_1.update_indicator)
+
         self.videomodel.framenumber.connect(model.set_pos_in_video)#triggers pos in eeg
         model.pos_in_eeg.connect(optiondisplay.graphicsView.update_indicator)
-        #model.mothistmap.connect(optiondisplay.mothist_plot.print_data)
+        model.mothistmap.connect(optiondisplay.graphicsView_1.print_data)
+
+        model.datatype_signal.connect(self.set_active_page)
 
         self.redraw_button()
+
+    def set_active_page(self, msg):
+        if (msg == "motion"):
+            print("set to motion")
+            self.optiondisplay.pages.setCurrentIndex(1)
+        elif(msg == "eeg"):
+            self.optiondisplay.pages.setCurrentIndex(0)
+
+
 
     def delete(self, widget, layout):
         """ Deletes a model from the widget (by reinitializing the centralwidget) and the list of models  """

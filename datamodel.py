@@ -66,8 +66,10 @@ class DataModel(QObject):
             self.set_datatype("eeg")
         elif(".mot" in filepath):
             self.set_datatype("motion")
+        elif(".h5" in filepath or ".hdf5" in filepath):
+            self.set_datatype("motion")
         else:
-            raise ValueError("Specify a filepath to a .mot or a .eeg file");
+            raise ValueError("Specify a filepath to a .mot .h5 or .hdf5 or a .eeg file");
 
 
         if self.datatype == "eeg": # set title and set vmrk metainfo-file-path. Error when it doesn't exist
@@ -155,21 +157,25 @@ class DataModel(QObject):
         return self.is_deleted
 
     def change_channel(self, channel):
-        assert False
         self.channel = channel
         self.load()
 
     def load_motion(self):
         try:
             f = tables.open_file(self.filepath, mode='r')
-            weighted_hist = np.array(f.root.data, dtype=np.float64)
+            #weighted_hist = np.array(list(f.root)[0], dtype=np.float64)#f.root.motion_tensors or f.root.data
+            if "/motion_tensor" in f:
+                weighted_hist = np.array(f.root.motion_tensor, dtype=np.float64)
+            else:
+                raise Exception("File doesn't contain node 'motion_tensor'")
 
             weighted_hist = (weighted_hist - np.min(weighted_hist))
             weighted_hist = weighted_hist + 1
             weighted_hist = np.log(weighted_hist)
 
             #transform to be between 0 and 1
-            weighted_hist = (weighted_hist - np.min(weighted_hist)) / (np.max(weighted_hist) - np.min(weighted_hist))
+            if((np.max(weighted_hist) - np.min(weighted_hist))!=0.0):
+                weighted_hist = (weighted_hist - np.min(weighted_hist)) / (np.max(weighted_hist) - np.min(weighted_hist))
 
             self.data = weighted_hist
             self.mothistmap.emit(self.data)

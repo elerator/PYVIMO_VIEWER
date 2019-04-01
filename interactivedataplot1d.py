@@ -18,6 +18,11 @@ class InteractiveDataplot1d(PlotWidget):
         self.video_model = video_model
         self.model = model
 
+        #export = self.sceneObj.contextMenu
+        #del export[:]#modify contextMenu
+
+        self.getPlotItem().ctrlMenu = None#Delete "Plot Options" option from context menu as it contains bugs and crashes with float data
+
         if(type(self.model)==type(None)):#Create empty model if no model was given
             self.model = DataModel()
 
